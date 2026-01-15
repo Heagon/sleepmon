@@ -6,7 +6,7 @@
 const { DateTime } = luxon;
 
 // ===== CHANGE THIS =====
-const API_BASE = "https://sleepmon-api.sleepmon.workers.dev";
+const API_BASE = "https://sleepmon-api.YOURNAME.workers.dev";
 
 // UI refs
 const connPill = document.getElementById("connPill");
@@ -182,14 +182,35 @@ function setDayLabels(){
   rmsDayLabel.textContent  = label;
 }
 
-const PALETTE_SPO2 = [
-  "#e53935", "#d32f2f", "#c62828", "#b71c1c", "#ff5252", "#ff1744", "#f44336"
-];
-const PALETTE_RMS = [
-  "#1565c0", "#1e88e5", "#42a5f5", "#0d47a1", "#64b5f6", "#90caf9", "#2196f3"
+const TODAY_SPO2_COLOR = "#e53935"; // Spo2: màu mặc định cho hôm nay / Live
+const TODAY_RMS_COLOR  = "#1565c0"; // RMS:  màu mặc định cho hôm nay / Live
+
+// Màu dùng cho các ngày KHÁC hôm nay (mỗi ngày 1 màu rõ ràng, dễ phân biệt)
+const MULTI_DAY_COLORS = [
+  "#43a047", // xanh lá
+  "#fb8c00", // cam
+  "#8e24aa", // tím
+  "#00acc1", // cyan
+  "#fdd835", // vàng
+  "#ff7043", // cam san hô
+  "#26a69a", // teal
+  "#7e57c2", // tím nhạt
+  "#9e9d24"  // olive
 ];
 
-function datasetsFromDays(daysObj, field, unitLabel, palette){
+function colorForDay(dayStr, field){
+  const today = hanoiTodayStr();
+  if (dayStr === today){
+    return (field === "spo2") ? TODAY_SPO2_COLOR : TODAY_RMS_COLOR;
+  }
+  // Tính index ổn định trong các ngày KHÁC hôm nay (giữ màu nhất quán khi bạn tick/untick)
+  const others = selectedDates.filter(d => d !== today);
+  const idx = others.indexOf(dayStr);
+  if (idx < 0) return (field === "spo2") ? TODAY_SPO2_COLOR : TODAY_RMS_COLOR;
+  return MULTI_DAY_COLORS[idx % MULTI_DAY_COLORS.length];
+}
+
+function datasetsFromDays(daysObj, field, unitLabel){
   const datasets = [];
   selectedDates.forEach((d, idx) => {
     const arr = daysObj[d] || [];
@@ -197,7 +218,7 @@ function datasetsFromDays(daysObj, field, unitLabel, palette){
       .filter(p => p[field] !== null && p[field] !== undefined)
       .map(p => ({ x: p.ts * 1000, y: p[field] }));
 
-    const color = (palette && palette.length) ? palette[idx % palette.length] : undefined;
+    const color = colorForDay(d, field);
 
     datasets.push({
       label: fmtDayDisp(d) + " " + unitLabel,
@@ -228,8 +249,8 @@ async function loadSelected(){
     const res = await apiGet(`/telemetry/days?dates=${q}`);
     setConn(true);
 
-    spo2Chart.data.datasets = datasetsFromDays(res.days, "spo2", "(%)", PALETTE_SPO2);
-    rmsChart.data.datasets  = datasetsFromDays(res.days, "rms", "(RMS)", PALETTE_RMS);
+    spo2Chart.data.datasets = datasetsFromDays(res.days, "spo2", "(%)");
+    rmsChart.data.datasets  = datasetsFromDays(res.days, "rms", "(RMS)");
 
     spo2Chart.update();
     rmsChart.update();
