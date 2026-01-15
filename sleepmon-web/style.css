@@ -100,3 +100,8 @@ button:hover{border-color:#2e4366}
 .item a{color:var(--ok); text-decoration:none}
 .item a:hover{text-decoration:underline}
 code{background:#0e1522; border:1px solid var(--line); padding:2px 6px; border-radius:8px;}
+
+
+/* Day color indicator under each date chip */
+.datechip{position:relative; padding-bottom:12px;}
+.datechip::after{content:""; position:absolute; left:10px; right:10px; bottom:4px; height:4px; border-radius:4px; background: var(--day-color, transparent); opacity:0.95;}

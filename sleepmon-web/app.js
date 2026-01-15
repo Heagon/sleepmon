@@ -313,6 +313,7 @@ function renderDateSelector(){
   dates.forEach(d => {
     const chip = document.createElement("label");
     chip.className = "datechip";
+    chip.style.setProperty("--day-color", colorForDay(d));
     const cb = document.createElement("input");
     cb.type = "checkbox";
     cb.checked = selectedDates.includes(d);
@@ -354,32 +355,26 @@ function setDayLabels(){
   rmsDayLabel.textContent  = label;
 }
 
-const TODAY_SPO2_COLOR = "#e53935"; // Spo2: màu mặc định cho hôm nay / Live
-const TODAY_RMS_COLOR  = "#1565c0"; // RMS:  màu mặc định cho hôm nay / Live
-
-// Màu dùng cho các ngày KHÁC hôm nay (mỗi ngày 1 màu rõ ràng, dễ phân biệt)
-const MULTI_DAY_COLORS = [
-  "#43a047", // xanh lá
-  "#fb8c00", // cam
-  "#8e24aa", // tím
-  "#00acc1", // cyan
-  "#fdd835", // vàng
-  "#ff7043", // cam san hô
-  "#26a69a", // teal
-  "#7e57c2", // tím nhạt
-  "#9e9d24"  // olive
+const DAY_COLORS_BY_OFFSET = [
+  "#e53935", // hôm nay / live: đỏ
+  "#43a047", // hôm qua: xanh lá
+  "#1e88e5", // 2 ngày trước: xanh dương
+  "#fdd835", // 3 ngày trước: vàng
+  "#8e24aa", // 4 ngày trước: tím
+  "#fb8c00", // 5 ngày trước: cam
+  "#d81b60"  // 6 ngày trước: hồng
 ];
 
-function colorForDay(dayStr, field){
-  const today = hanoiTodayStr();
-  if (dayStr === today){
-    return (field === "spo2") ? TODAY_SPO2_COLOR : TODAY_RMS_COLOR;
+function colorForDay(dayIso){
+  // dayIso: YYYY-MM-DD
+  const today = DateTime.now().setZone(TZ).startOf("day");
+  const d = DateTime.fromISO(dayIso).startOf("day");
+  const diff = Math.round(today.diff(d, "days").days); // 0..6 trong phạm vi 7 ngày gần nhất
+  if (diff >= 0 && diff < DAY_COLORS_BY_OFFSET.length){
+    return DAY_COLORS_BY_OFFSET[diff];
   }
-  // Tính index ổn định trong các ngày KHÁC hôm nay (giữ màu nhất quán khi bạn tick/untick)
-  const others = selectedDates.filter(d => d !== today);
-  const idx = others.indexOf(dayStr);
-  if (idx < 0) return (field === "spo2") ? TODAY_SPO2_COLOR : TODAY_RMS_COLOR;
-  return MULTI_DAY_COLORS[idx % MULTI_DAY_COLORS.length];
+  // fallback (ngoài phạm vi)
+  return "#90a4ae";
 }
 
 function datasetsFromDays(daysObj, field, unitLabel){
@@ -390,7 +385,7 @@ function datasetsFromDays(daysObj, field, unitLabel){
       .filter(p => p[field] !== null && p[field] !== undefined)
       .map(p => ({ x: p.ts * 1000, y: p[field] }));
 
-    const color = colorForDay(d, field);
+    const color = colorForDay(d);
 
     datasets.push({
       label: fmtDayDisp(d) + " " + unitLabel,
