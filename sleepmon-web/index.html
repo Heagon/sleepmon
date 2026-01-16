@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>SleepMon – SpO2 & RMS Monitor</title>
-  <link rel="stylesheet" href="./style.css?v=20260115_02" />
+  <link rel="stylesheet" href="./style.css?v=20260116_abn_table_v2" />
 </head>
 <body>
   <header class="bar">
@@ -50,21 +50,36 @@
     </section>
 
     <section class="card">
-      <div class="row">
-        <div>
-          <div class="h">Abnormal</div>
-          <div class="sub">Chỉ hiển thị thời điểm bắt đầu xảy ra Abnormal (không tải audio lên cloud). Danh sách sẽ lọc theo ngày bạn chọn ở trên.</div>
-        </div>
-      </div>
+  <div class="row">
+    <div>
+      <div class="h">Abnormal</div>
+      <div class="sub">Các mốc thời gian bắt đầu Abnormal do hệ thống phát hiện (lọc theo ngày đã chọn). Tích để hiện vạch trên đồ thị.</div>
+    </div>
+  </div>
 
-      <div id="abnList" class="abn"></div>
-    </section>
+  <div class="abnWrap">
+    <table class="abnTable" aria-label="Bảng Abnormal">
+      <thead>
+        <tr>
+          <th class="abnColIdx">STT</th>
+          <th>Tên file Abnormal</th>
+          <th class="abnColPick">
+            <span>Chọn tất cả</span>
+            <input type="checkbox" id="abnCheckAll" />
+          </th>
+        </tr>
+      </thead>
+      <tbody id="abnTbody"></tbody>
+    </table>
+    <div id="abnEmpty" class="muted" style="display:none"></div>
+  </div>
+</section>
 </main>
 
   <script src="https://cdn.jsdelivr.net/npm/luxon@3.5.0/build/global/luxon.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1.3.1/dist/chartjs-adapter-luxon.umd.min.js"></script>
 
-  <script src="./app.js?v=20260115_02"></script>
+  <script src="./app.js?v=20260116_abn_table_v2"></script>
 </body>
 </html>
