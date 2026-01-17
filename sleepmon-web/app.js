@@ -434,7 +434,22 @@ function datasetsFromDays(daysObj, field, unitLabel){
         // Insert a null point to force a visual break.
         out.push({ x: (lastTs + 1) * 1000, y: null });
       }
-      out.push({ x: p.ts * 1000, y: (p[field] === undefined ? null : p[field]) });
+      // Normalize values: missing/invalid -> null so we DON'T draw confusing connecting lines.
+      let y = (p[field] === undefined ? null : p[field]);
+      if (y !== null){
+        // API sometimes returns 0 (or negative) for missing points; treat as gap.
+        if (typeof y !== 'number') y = Number(y);
+
+        if (field === 'spo2'){
+          // SpO2 outside physiological range should be treated as missing.
+          if (!Number.isFinite(y) || y < 70 || y > 100) y = null;
+        } else if (field === 'rms'){
+          if (!Number.isFinite(y) || y <= 0) y = null;
+        } else {
+          if (!Number.isFinite(y)) y = null;
+        }
+      }
+      out.push({ x: p.ts * 1000, y });
       lastTs = p.ts;
     }
 
