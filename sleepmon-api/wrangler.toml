@@ -6,7 +6,7 @@ compatibility_date = "2025-12-01"
 [[d1_databases]]
 binding = "DB"
 database_name = "sleepmon_db"
-database_id = "PUT_YOUR_D1_ID_HERE"
+database_id = "a112f28f-3391-499b-943a-5e498012142c"
 
 # R2 bucket binding
 [[r2_buckets]]
