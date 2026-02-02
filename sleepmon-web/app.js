@@ -79,37 +79,42 @@ function parseHHMM(v) {
 function pad2(n){ return String(n).padStart(2,"0"); }
 
 function initTimePick(){
-  if (!hourPick || !minPick) return;
+  const hEl = document.getElementById("hourPick");
+  const mEl = document.getElementById("minPick");
+  if (!hEl || !mEl) return;
 
   // Hours 00-23
-  hourPick.innerHTML = "";
+  hEl.innerHTML = "";
   for (let h=0; h<=23; h++){
     const opt = document.createElement("option");
     opt.value = String(h);
     opt.textContent = pad2(h);
-    hourPick.appendChild(opt);
+    hEl.appendChild(opt);
   }
 
   // Minutes: 00,10,20,30,40,50
-  minPick.innerHTML = "";
+  mEl.innerHTML = "";
   for (let m=0; m<=50; m+=10){
     const opt = document.createElement("option");
     opt.value = String(m);
     opt.textContent = pad2(m);
-    minPick.appendChild(opt);
+    mEl.appendChild(opt);
   }
 
   // Default 00:00
-  hourPick.value = "0";
-  minPick.value = "0";
+  hEl.value = "0";
+  mEl.value = "0";
 }
 
 function getPickedTime(){
-  const hh = Math.max(0, Math.min(23, Number(hourPick?.value ?? 0)));
-  const mmRaw = Number(minPick?.value ?? 0);
+  const hEl = document.getElementById("hourPick");
+  const mEl = document.getElementById("minPick");
+  const hh = Math.max(0, Math.min(23, Number(hEl?.value ?? 0)));
+  const mmRaw = Number(mEl?.value ?? 0);
   const mm = Math.max(0, Math.min(50, Math.floor(mmRaw / 10) * 10));
   return { hh, mm };
 }
+
 
 
 function windowRangeMsFromStart(hh, mm) {
@@ -390,3 +395,8 @@ applyTimeBtn.addEventListener("click", async () => {
 
 // Init
 initTimePick();
+
+
+document.addEventListener("DOMContentLoaded", () => {
+  initTimePick();
+});
