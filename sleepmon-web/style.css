@@ -140,28 +140,14 @@ code{background:#0e1522; border:1px solid var(--line); padding:2px 6px; border-r
 .abnFile{font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;}
 .abnMeta{color:var(--muted); font-size:12px; margin-top:4px;}
 
-/* Time window controls */
-.controls{flex-wrap:wrap; gap:10px;}
-.timePick{
-  display:flex;
-  gap:8px;
-  align-items:center;
-  color:var(--muted);
-  font-size:12px;
-}
-.timePick input[type=time]{
-  background:#0e1522;
-  color:var(--text);
-  border:1px solid var(--line);
-  border-radius:10px;
-  padding:8px 10px;
-}
 
+/* ===== v6: Time window controls ===== */
+.controls .controls-row{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.controls .controls-title{font-weight:700;font-size:16px}
+.controls .controls-sub{opacity:.85;font-size:12px;margin-top:4px}
+.window-note{margin-top:10px;font-size:12px;opacity:.9}
 
-.hint{display:block;margin-top:6px;font-size:12px;opacity:.8}
-
-
-/* 24h time picker (hour + minute) */
+.controls-right{display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap}
 .timePick{display:flex;flex-direction:column;gap:6px;align-items:flex-start}
 .timePickLabel{font-size:12px;opacity:.9}
 .timePickRow{display:flex;align-items:center;gap:8px}
@@ -173,7 +159,14 @@ code{background:#0e1522; border:1px solid var(--line); padding:2px 6px; border-r
   padding:8px 10px;
   font-size:14px;
   outline:none;
+  min-width:64px;
 }
 .timePick select:focus{border-color:#3b82f6}
 .timeSep{opacity:.8}
 .timeHint{font-size:12px;opacity:.75}
+
+.liveToggle{display:flex;align-items:center;gap:8px;font-size:12px;opacity:.9;padding:8px 10px;border:1px solid #233551;border-radius:999px;background:#0e1727}
+.liveToggle input{width:16px;height:16px}
+
+/* Button alignment */
+#applyTimeBtn{white-space:nowrap}

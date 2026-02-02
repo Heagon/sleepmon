@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>SleepMon – SpO2 & RMS Monitor</title>
-  <link rel="stylesheet" href="./style.css?v=20260202_v5" />
+  <link rel="stylesheet" href="./style.css?v=20260116_abn_table_v2" />
 </head>
 <body>
   <header class="bar">
@@ -17,24 +17,11 @@
     <section class="card">
       <div class="row">
         <div>
-          <div class="h">Bộ lọc thời điểm (hiển thị 10 phút)</div>
-          <div class="sub">Chọn giờ/phút để xem dữ liệu trong 10 phút kể từ thời điểm đó. Mặc định: 00:00.</div>
+          <div class="h">Chọn ngày (tối đa 7 ngày gần nhất)</div>
+          <div class="sub">Chọn nhiều ngày để so sánh (tự tắt Live).</div>
         </div>
 
-        <div class="row right controls">
-          <div class="timePick">
-  <span class="timePickLabel">Thời điểm</span>
-  <div class="timePickRow" role="group" aria-label="Chọn thời điểm (24h)">
-    <select id="hourPick" aria-label="Giờ (0-23)"></select>
-    <span class="timeSep">:</span>
-    <select id="minPick" aria-label="Phút (bước 10)"></select>
-  </div>
-  <div class="timeHint">Giờ 0–23 • Phút: 00, 10, 20, 30, 40, 50</div>
-</div>
-
-
-          <button id="applyTimeBtn">Áp dụng</button>
-
+        <div class="row right">
           <label class="toggle">
             <input type="checkbox" id="liveToggle" />
             <span>Live</span>
@@ -44,7 +31,8 @@
         </div>
       </div>
 
-      <div class="note" id="windowNote"></div>
+      <div id="dateBox" class="datebox"></div>
+      <div class="note" id="modeNote"></div>
     </section>
 
     <section class="grid2">
@@ -60,12 +48,40 @@
         <div class="chartFooter" id="rmsDayLabel"></div>
       </section>
     </section>
-  </main>
+
+    <section class="card">
+  <div class="row">
+    <div>
+      <div class="h">Thời điểm diễn ra ngưng thở</div>
+      <div class="sub">Các mốc thời gian hệ thống đánh dấu ngưng thở. Để lọc và đánh dấu trên biểu đồ, chỉ chọn <b>1</b> ngày ở phần “Chọn ngày” phía trên.</div>
+    </div>
+  </div>
+
+  <div class="abnWrap">
+    <table class="abnTable" aria-label="Bảng Abnormal">
+      <thead>
+        <tr>
+          <th class="abnColIdx">STT</th>
+            <th>Tên file</th>
+          <th class="abnColPick">
+            <span>Chọn tất cả</span>
+            <input type="checkbox" id="abnCheckAll" />
+          </th>
+        </tr>
+      </thead>
+      <tbody id="abnTbody"></tbody>
+    </table>
+    <div id="abnEmpty" class="muted" style="display:none"></div>
+  </div>
+</section>
+</main>
 
   <script src="https://cdn.jsdelivr.net/npm/luxon@3.5.0/build/global/luxon.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <!-- Required for vertical dashed markers (apnea events) on charts -->
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1.3.1/dist/chartjs-adapter-luxon.umd.min.js"></script>
 
-  <script src="./app.js?v=20260202_v5"></script>
+  <script src="./app.js?v=20260202_v6" defer></script>
 </body>
 </html>
