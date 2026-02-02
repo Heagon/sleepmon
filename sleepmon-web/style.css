@@ -159,3 +159,21 @@ code{background:#0e1522; border:1px solid var(--line); padding:2px 6px; border-r
 
 
 .hint{display:block;margin-top:6px;font-size:12px;opacity:.8}
+
+
+/* 24h time picker (hour + minute) */
+.timePick{display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+.timePickLabel{font-size:12px;opacity:.9}
+.timePickRow{display:flex;align-items:center;gap:8px}
+.timePick select{
+  background:#0e1727;
+  color:#e8eef7;
+  border:1px solid #233551;
+  border-radius:10px;
+  padding:8px 10px;
+  font-size:14px;
+  outline:none;
+}
+.timePick select:focus{border-color:#3b82f6}
+.timeSep{opacity:.8}
+.timeHint{font-size:12px;opacity:.75}

@@ -30,8 +30,10 @@ const livePill = document.getElementById("livePill");
 const liveToggle = document.getElementById("liveToggle");
 const reloadBtn = document.getElementById("reloadBtn");
 
-const timePick = document.getElementById("timePick");
 const applyTimeBtn = document.getElementById("applyTimeBtn");
+
+const hourPick = document.getElementById("hourPick");
+const minPick  = document.getElementById("minPick");
 const windowNote = document.getElementById("windowNote");
 
 const spo2DayLabel = document.getElementById("spo2DayLabel");
@@ -73,6 +75,42 @@ function parseHHMM(v) {
   if (!m) return { hh: 0, mm: 0 };
   return { hh: Number(m[1]), mm: Number(m[2]) };
 }
+
+function pad2(n){ return String(n).padStart(2,"0"); }
+
+function initTimePick(){
+  if (!hourPick || !minPick) return;
+
+  // Hours 00-23
+  hourPick.innerHTML = "";
+  for (let h=0; h<=23; h++){
+    const opt = document.createElement("option");
+    opt.value = String(h);
+    opt.textContent = pad2(h);
+    hourPick.appendChild(opt);
+  }
+
+  // Minutes: 00,10,20,30,40,50
+  minPick.innerHTML = "";
+  for (let m=0; m<=50; m+=10){
+    const opt = document.createElement("option");
+    opt.value = String(m);
+    opt.textContent = pad2(m);
+    minPick.appendChild(opt);
+  }
+
+  // Default 00:00
+  hourPick.value = "0";
+  minPick.value = "0";
+}
+
+function getPickedTime(){
+  const hh = Math.max(0, Math.min(23, Number(hourPick?.value ?? 0)));
+  const mmRaw = Number(minPick?.value ?? 0);
+  const mm = Math.max(0, Math.min(50, Math.floor(mmRaw / 10) * 10));
+  return { hh, mm };
+}
+
 
 function windowRangeMsFromStart(hh, mm) {
   const base = hanoiNow().startOf("day");
@@ -200,7 +238,7 @@ function applyWindowToCharts(points, startMs, endMs) {
 async function loadTodayAndRenderByTime() {
   ensureCharts();
 
-  const { hh, mm } = parseHHMM(timePick?.value);
+  const { hh, mm } = getPickedTime();
   updateWindowNoteForHistory(hh, mm);
 
   const { startMs, endMs } = windowRangeMsFromStart(hh, mm);
@@ -342,3 +380,13 @@ liveToggle?.addEventListener("change", async () => {
   stopLive();
   await loadTodayAndRenderByTime();
 })();
+
+applyTimeBtn.addEventListener("click", async () => {
+  stopLive();
+  if (liveToggle) liveToggle.checked = false;
+  await loadTodayAndRenderByTime();
+});
+
+
+// Init
+initTimePick();
