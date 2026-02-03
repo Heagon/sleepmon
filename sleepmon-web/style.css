@@ -33,17 +33,17 @@ body{
   font-size:12px;
   color:var(--muted);
 }
-.container{max-width:1100px; margin:0 auto; padding:16px;}
+.container{max-width:1400px; margin:0 auto; padding:16px;}
 .card{
   background:var(--card);
   border:1px solid var(--line);
   border-radius:14px;
-  padding:14px;
+  padding:16px;
   margin-bottom:14px;
 }
 .grid2{
   display:grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0,1fr) minmax(0,1fr);
   gap:14px;
 }
 @media (max-width: 900px){
@@ -70,11 +70,19 @@ button{cursor:pointer}
 button:hover{border-color:#2e4366}
 .datebox{
   display:flex;
-  flex-wrap:wrap;
-  gap:8px;
+  gap:10px;
   margin-top:10px;
+  overflow-x:auto;
+  padding-bottom:4px;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* mobile: cho phép xuống dòng để dễ bấm */
+@media (max-width: 700px){
+  .datebox{flex-wrap:wrap; overflow-x:visible}
 }
 .datechip{
+  flex:0 0 auto;
   border:1px solid var(--line);
   border-radius:999px;
   padding:7px 10px 14px 10px; /* chừa chỗ cho vạch màu */
@@ -110,7 +118,7 @@ button:hover{border-color:#2e4366}
 
 /* Fix: khóa chiều cao vùng biểu đồ để canvas không tự phình ra vô hạn */
 .chartWrap{
-  height: 360px;            /* đổi 300/400 nếu bạn muốn */
+  height: 440px;            /* biểu đồ cao hơn để nhìn rõ */
   position: relative;
 }
 .chartWrap canvas{
@@ -161,6 +169,7 @@ code{background:#0e1522; border:1px solid var(--line); padding:2px 6px; border-r
 
 /* ===== v6: Time window controls ===== */
 .controls .controls-row{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.controls .controls-row{align-items:center}
 .controls .controls-title{font-weight:700;font-size:16px}
 .controls .controls-sub{opacity:.85;font-size:12px;margin-top:4px}
 .window-note{margin-top:10px;font-size:12px;opacity:.9}
@@ -169,6 +178,7 @@ code{background:#0e1522; border:1px solid var(--line); padding:2px 6px; border-r
 .timePick{display:flex;flex-direction:column;gap:6px;align-items:flex-start}
 .timePickLabel{font-size:12px;opacity:.9}
 .timePickRow{display:flex;align-items:center;gap:8px}
+#applyTimeBtn{font-weight:700}
 .timePick select{
   background:#0e1727;
   color:#e8eef7;

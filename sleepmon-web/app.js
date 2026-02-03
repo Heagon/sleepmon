@@ -19,9 +19,6 @@ const RMS_COLOR  = "#3b82f6";      // xanh dương
 
 // UI refs
 const connPill = document.getElementById("connPill");
-const livePill = document.getElementById("livePill");
-const liveToggle = document.getElementById("liveToggle");
-const reloadBtn = document.getElementById("reloadBtn");
 
 const hourPick = document.getElementById("hourPick");
 const minPick  = document.getElementById("minPick");
@@ -29,19 +26,12 @@ const applyTimeBtn = document.getElementById("applyTimeBtn");
 const windowNote = document.getElementById("windowNote");
 
 const dateBox = document.getElementById("dateBox");
-const modeNote = document.getElementById("modeNote");
 
 const spo2DayLabel = document.getElementById("spo2DayLabel");
 const rmsDayLabel  = document.getElementById("rmsDayLabel");
 
 // Charts
 let spo2Chart, rmsChart;
-
-// Live
-let liveTimer = null;
-
-// Live bucket tracking (10-minute buckets)
-let liveBucketStartMs = null;
 
 // Cache day data by dateISO
 const dayCache = new Map(); // dateISO -> { dateISO, points:[{ts,spo2,rms,alarmA?}] }
@@ -52,11 +42,6 @@ let selectedDateISO = null;
 function setConn(ok) {
   connPill.textContent = ok ? "API: OK" : "API: chưa kết nối";
   connPill.style.color = ok ? "var(--ok)" : "var(--muted)";
-}
-
-function setLivePill(on) {
-  livePill.textContent = on ? "LIVE: ON" : "LIVE: OFF";
-  livePill.style.color = on ? "var(--warn)" : "var(--muted)";
 }
 
 function hanoiNow() {
@@ -142,21 +127,11 @@ function renderDateChips(){
       if (selectedDateISO === d) return;
       selectedDateISO = d;
 
-      // Tắt live nếu không phải hôm nay
-      if (selectedDateISO !== isoToday() && liveToggle){
-        liveToggle.checked = false;
-        stopLive();
-      }
-
       renderDateChips();
       await loadSelectedDayAndRenderByTime();
     });
     dateBox.appendChild(b);
   });
-
-  if (modeNote){
-    modeNote.textContent = `Đang chọn: ${fmtDayDisp(selectedDateISO)}${selectedDateISO === isoToday() ? " (hôm nay)" : ""}`;
-  }
 }
 
 function getWindowMs(dateISO, hh, mm){
@@ -321,138 +296,15 @@ async function loadSelectedDayAndRenderByTime(){
   }
 }
 
-// ===== Live mode (bucketed 10 minutes) =====
-function stopLive(){
-  if (liveTimer){
-    clearInterval(liveTimer);
-    liveTimer = null;
-  }
-  liveBucketStartMs = null;
-  setLivePill(false);
-}
-
-function bucketStartEndMs(nowMs){
-  const t = DateTime.fromMillis(nowMs, { zone: TZ });
-  const bucketMinute = Math.floor(t.minute / WINDOW_MIN) * WINDOW_MIN;
-  const start = t.set({ minute: bucketMinute, second: 0, millisecond: 0 });
-  const end = start.plus({ minutes: WINDOW_MIN });
-  return { startMs: start.toMillis(), endMs: end.toMillis(), start, end };
-}
-
-function resetLiveBucket(startMs, endMs, start, end){
-  liveBucketStartMs = startMs;
-  spo2Chart.data.datasets = [buildDataset([], "spo2", "SpO2 (%)", SPO2_COLOR)];
-  rmsChart.data.datasets  = [buildDataset([], "rms",  "RMS",      RMS_COLOR)];
-
-  spo2Chart.options.scales.x.min = startMs;
-  spo2Chart.options.scales.x.max = endMs;
-  rmsChart.options.scales.x.min  = startMs;
-  rmsChart.options.scales.x.max  = endMs;
-
-  spo2Chart.update();
-  rmsChart.update();
-
-  if (windowNote){
-    windowNote.textContent = `Live: ${start.toFormat("HH:mm")} → ${end.toFormat("HH:mm")} (${WINDOW_MIN} phút)`;
-  }
-
-  // Keep date label synced
-  setDayLabels(isoToday());
-}
-
-async function startLiveBucketedWindow(){
-  ensureCharts();
-  setLivePill(true);
-
-  // Live luôn đi kèm "hôm nay"
-  selectedDateISO = isoToday();
-  renderDateChips();
-
-  liveTimer = setInterval(async () => {
-    try{
-      const res = await apiGet("/telemetry/latest");
-      setConn(true);
-      const p = res.point;
-      if (!p || !p.ts) return;
-
-      const nowMs = p.ts * 1000;
-      const { startMs, endMs, start, end } = bucketStartEndMs(nowMs);
-
-      // If crossed into a new 10-minute bucket, reset chart datasets
-      if (liveBucketStartMs === null || startMs !== liveBucketStartMs){
-        resetLiveBucket(startMs, endMs, start, end);
-      }
-
-      // Only accept points that belong to current bucket
-      if (nowMs < startMs || nowMs >= endMs) return;
-
-      // push
-      const dsSpo2 = spo2Chart.data.datasets[0];
-      const dsRms  = rmsChart.data.datasets[0];
-
-      const spo2v = sanitizeValue("spo2", p.spo2);
-      const rmsv  = sanitizeValue("rms",  p.rms);
-      if (spo2v !== null){
-        dsSpo2.data.push({ x: nowMs, y: spo2v });
-      }
-      if (rmsv !== null){
-        dsRms.data.push({ x: nowMs, y: rmsv });
-      }
-
-      // trim (đề phòng dữ liệu cũ)
-      dsSpo2.data = dsSpo2.data.filter(pt => pt.x >= startMs && pt.x < endMs);
-      dsRms.data  = dsRms.data.filter(pt => pt.x >= startMs && pt.x < endMs);
-
-      spo2Chart.update("none");
-      rmsChart.update("none");
-
-      if (windowNote){
-        windowNote.textContent = `Live: ${start.toFormat("HH:mm")} → ${end.toFormat("HH:mm")} (${WINDOW_MIN} phút)`;
-      }
-      setDayLabels(isoToday());
-    }catch(e){
-      setConn(false);
-      console.error(e);
-    }
-  }, 1000);
-}
-
 // ===== UI events =====
 applyTimeBtn?.addEventListener("click", async () => {
-  if (liveToggle) liveToggle.checked = false;
-  stopLive();
   await loadSelectedDayAndRenderByTime();
-});
-
-reloadBtn?.addEventListener("click", async () => {
-  dayCache.clear();
-  if (liveToggle?.checked){
-    stopLive();
-    startLiveBucketedWindow();
-  } else {
-    await loadSelectedDayAndRenderByTime();
-  }
-});
-
-liveToggle?.addEventListener("change", async () => {
-  if (liveToggle.checked){
-    // Live chỉ cho hôm nay
-    selectedDateISO = isoToday();
-    renderDateChips();
-    stopLive();
-    startLiveBucketedWindow();
-  } else {
-    stopLive();
-    await loadSelectedDayAndRenderByTime();
-  }
 });
 
 // ===== INIT =====
 (function init(){
   initTimePick();
   ensureCharts();
-  setLivePill(false);
-  if (liveToggle) liveToggle.checked = false;
 
   // Default: chọn cửa sổ theo mốc 10 phút hiện tại
   const now = hanoiNow();
