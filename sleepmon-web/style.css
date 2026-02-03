@@ -107,6 +107,17 @@ button:hover{border-color:#2e4366}
 .datechip input{transform: scale(1.1);}
 .toggle{display:flex; gap:8px; align-items:center; color:var(--muted); font-size:12px;}
 .chartFooter{color:var(--muted); font-size:12px; margin-top:8px; text-align:center;}
+
+/* Fix: khóa chiều cao vùng biểu đồ để canvas không tự phình ra vô hạn */
+.chartWrap{
+  height: 360px;            /* đổi 300/400 nếu bạn muốn */
+  position: relative;
+}
+.chartWrap canvas{
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
 .list{display:flex; flex-direction:column; gap:10px; margin-top:10px;}
 .item{
   padding:10px;
